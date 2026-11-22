@@ -15,4 +15,6 @@
     <string name="action_launch_campaign">Launch Campaign</string>
     <string name="action_request_withdrawal">Request Withdrawal</string>
     <string name="action_deposit_tzs">Top Up Wallet</string>
+
+    <string name="default_web_client_id" translatable="false">426291582460-0k1i3dch11gtulnjlqtjrsll9ofmn865.apps.googleusercontent.com</string>
 </resources>
