@@ -27,7 +27,7 @@ workflows:
       - app/build/outputs/**/*.apk
       - app/build/outputs/**/*.aab
 
-    publishing:
+  publishing:
       email:
         recipients:
           - $CM_EMAIL
