@@ -9,14 +9,13 @@ workflows:
       vars:
         PACKAGE_NAME: "com.aistudio.razaktask.rzkmtp"
 
-    scripts:
-      - name: Check Gradle
+     scripts:
+      - name: Install Gradle 9.3.1
         script: |
-          gradle --version
-          gradle assembleDebug
+          curl -L https://services.gradle.org/distributions/gradle-9.3.1-bin.zip -o /tmp/gradle.zip
+          unzip -q /tmp/gradle.zip -d /tmp
+          /tmp/gradle-9.3.1/bin/gradle --version
 
-    artifacts:
-      - app/build/outputs/**/*.apk
-  
-
-   
+      - name: Build Android APK
+        script: |
+          /tmp/gradle-9.3.1/bin/gradle assembleDebug
