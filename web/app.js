@@ -23,6 +23,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
 import { ADMIN_EMAIL, FIREBASE_CONFIG, FIRESTORE_DATABASE_ID } from "./firebase-config.js";
 import { DEFAULT_LANGUAGE, LANGUAGES, resolveLanguage, t } from "./i18n.js";
+ LANGUAGES, resolveLanguage, t } from "./i18n.js";
 
 const MIN_LIMIT_TZS = 1_000;
 const MAX_LIMIT_TZS = 1_000_000;
@@ -46,7 +47,8 @@ const ACTIONS = [
   { id: "COMMENT", labelKey: "actionComment", defaultTzs: 500 },
   { id: "SUBSCRIBE", labelKey: "actionSubscribe", defaultTzs: 1000 },
   { id: "SHARE_REPOST", labelKey: "actionShare", defaultTzs: 450 }
-];
+ge, t } from "./i18n.js";
+
 
 const WITHDRAWAL_METHODS = [
   { id: "MPESA_VODACOM", label: "M-Pesa", hint: "074X / 075X / 076X XXX XXX" },
