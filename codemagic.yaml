@@ -9,10 +9,14 @@ workflows:
       vars:
         PACKAGE_NAME: "com.aistudio.razaktask.rzkmtp"
 
-        scripts:
-      - name: Build Android APK
+    scripts:
+      - name: Check Gradle
         script: |
           gradle --version
-          gradle assembleDebug    
+          gradle assembleDebug
+
     artifacts:
       - app/build/outputs/**/*.apk
+  
+
+   
