@@ -1,0 +1,387 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global safety net: default deny everything
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isBootstrappedAdmin() {
+      return isSignedIn() &&
+             'email_verified' in request.auth.token &&
+             request.auth.token.email_verified == true &&
+             'email' in request.auth.token &&
+             request.auth.token.email == 'hamisijohari87@gmail.com';
+    }
+
+    function isAdmin() {
+      return isBootstrappedAdmin() ||
+             (isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
+    }
+
+    function isValidPlatform(platform) {
+      return platform in ['INSTAGRAM', 'TIKTOK', 'YOUTUBE', 'FACEBOOK', 'X_TWITTER'];
+    }
+
+    function isValidActionType(actionType) {
+      return actionType in ['FOLLOW', 'LIKE', 'COMMENT', 'SUBSCRIBE', 'SHARE_REPOST'];
+    }
+
+    function isValidLanguage(lang) {
+      return lang in ['sw', 'en', 'fr', 'ar', 'es', 'pt', 'de', 'zh', 'hi', 'tr'];
+    }
+
+    function isValidUserProfile(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.fullName is string && data.fullName.size() >= 1 && data.fullName.size() <= 80 &&
+             data.username is string && data.username.size() >= 2 && data.username.size() <= 40 &&
+             data.email is string && data.email.size() >= 3 && data.email.size() <= 120 &&
+             data.phoneNumber is string && data.phoneNumber.size() <= 30 &&
+             (!('preferredLanguage' in data) || isValidLanguage(data.preferredLanguage)) &&
+             data.role in ['USER', 'ADMIN'] &&
+             data.walletBalanceTzs is int && data.walletBalanceTzs >= 0 && data.walletBalanceTzs <= 100000000 &&
+             data.totalEarnedTzs is int && data.totalEarnedTzs >= 0 && data.totalEarnedTzs <= 100000000 &&
+             data.totalSpentTzs is int && data.totalSpentTzs >= 0 && data.totalSpentTzs <= 100000000 &&
+             data.tasksCompletedCount is int && data.tasksCompletedCount >= 0 && data.tasksCompletedCount <= 1000000 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidSocialTask(data) {
+      return data.creatorUserId is string && data.creatorUserId.size() >= 1 && data.creatorUserId.size() <= 128 &&
+             data.creatorName is string && data.creatorName.size() >= 1 && data.creatorName.size() <= 80 &&
+             data.title is string && data.title.size() >= 5 && data.title.size() <= 120 &&
+             data.description is string && data.description.size() >= 10 && data.description.size() <= 600 &&
+             isValidPlatform(data.platform) &&
+             isValidActionType(data.actionType) &&
+             data.accountHandle is string && data.accountHandle.size() >= 2 && data.accountHandle.size() <= 80 &&
+             data.targetUrl is string && data.targetUrl.size() >= 8 && data.targetUrl.size() <= 300 &&
+             data.rewardTzs is int && data.rewardTzs >= 50 && data.rewardTzs <= 500000 &&
+             (!('grossPerSlotTzs' in data) || (data.grossPerSlotTzs is int && data.grossPerSlotTzs >= 100 && data.grossPerSlotTzs <= 500000)) &&
+             (!('commissionPerSlotTzs' in data) || (data.commissionPerSlotTzs is int && data.commissionPerSlotTzs >= 0 && data.commissionPerSlotTzs <= 500000)) &&
+             (!('commissionEarnedTzs' in data) || (data.commissionEarnedTzs is int && data.commissionEarnedTzs >= 0 && data.commissionEarnedTzs <= 1000000)) &&
+             data.totalSlots is int && data.totalSlots >= 5 && data.totalSlots <= 10000 &&
+             (('grossPerSlotTzs' in data && (data.grossPerSlotTzs * data.totalSlots) >= 1000 && (data.grossPerSlotTzs * data.totalSlots) <= 1000000) ||
+              (!('grossPerSlotTzs' in data) && (data.rewardTzs * data.totalSlots) >= 1000 && (data.rewardTzs * data.totalSlots) <= 1000000)) &&
+             data.completedSlots is int && data.completedSlots >= 0 && data.completedSlots <= data.totalSlots &&
+             data.status in ['PENDING_REVIEW', 'ACTIVE', 'PAUSED', 'COMPLETED', 'REJECTED'] &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidSubmission(data) {
+      return data.taskId is string && isValidId(data.taskId) &&
+             data.taskTitle is string && data.taskTitle.size() >= 1 && data.taskTitle.size() <= 120 &&
+             isValidPlatform(data.platform) &&
+             isValidActionType(data.actionType) &&
+             data.rewardTzs is int && data.rewardTzs >= 100 && data.rewardTzs <= 500000 &&
+             data.workerUserId is string && data.workerUserId.size() >= 1 && data.workerUserId.size() <= 128 &&
+             data.workerName is string && data.workerName.size() >= 1 && data.workerName.size() <= 80 &&
+             data.socialHandleUsed is string && data.socialHandleUsed.size() >= 2 && data.socialHandleUsed.size() <= 80 &&
+             data.proofNote is string && data.proofNote.size() >= 4 && data.proofNote.size() <= 500 &&
+             (!('proofImageUri' in data) || (data.proofImageUri is string && data.proofImageUri.size() <= 600)) &&
+             data.status in ['PENDING', 'APPROVED', 'REJECTED'] &&
+             (!('reviewerNote' in data) || (data.reviewerNote is string && data.reviewerNote.size() <= 300)) &&
+             data.submittedAt is timestamp && data.submittedAt <= request.time &&
+             (!('reviewedAt' in data) || (data.reviewedAt is timestamp && data.reviewedAt <= request.time));
+    }
+
+    function isValidTransaction(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.type in ['TASK_REWARD', 'DEPOSIT_TOPUP', 'CAMPAIGN_FUND', 'PLATFORM_COMMISSION', 'WITHDRAWAL', 'WITHDRAWAL_REFUND'] &&
+             data.amountTzs is int && data.amountTzs >= 15 && data.amountTzs <= 100000000 &&
+             data.description is string && data.description.size() >= 2 && data.description.size() <= 200 &&
+             data.referenceCode is string && data.referenceCode.size() >= 4 && data.referenceCode.size() <= 40 &&
+             data.createdAt is timestamp && data.createdAt <= request.time;
+    }
+
+    function isValidCommission(data) {
+      return data.submissionId is string && isValidId(data.submissionId) &&
+             data.taskId is string && isValidId(data.taskId) &&
+             data.taskTitle is string && data.taskTitle.size() >= 1 && data.taskTitle.size() <= 120 &&
+             data.creatorUserId is string && data.creatorUserId.size() >= 1 && data.creatorUserId.size() <= 128 &&
+             data.workerUserId is string && data.workerUserId.size() >= 1 && data.workerUserId.size() <= 128 &&
+             data.grossAmountTzs is int && data.grossAmountTzs >= 100 && data.grossAmountTzs <= 1000000 &&
+             data.commissionTzs is int && data.commissionTzs >= 0 &&
+             data.workerRewardTzs is int && data.workerRewardTzs >= 50 &&
+             (data.commissionTzs + data.workerRewardTzs) == data.grossAmountTzs &&
+             (data.commissionTzs * 100) <= (data.grossAmountTzs * 15) &&
+             ((data.commissionTzs + 1) * 100) > (data.grossAmountTzs * 15) &&
+             data.referenceCode is string && data.referenceCode.size() >= 4 && data.referenceCode.size() <= 40 &&
+             data.createdAt is timestamp && data.createdAt <= request.time;
+    }
+
+    function isValidBusinessAccount(data) {
+      return data.accountId == 'razak_main' &&
+             data.accountName is string && data.accountName.size() >= 3 && data.accountName.size() <= 80 &&
+             data.totalCommissionEarnedTzs is int && data.totalCommissionEarnedTzs >= 0 && data.totalCommissionEarnedTzs <= 1000000000 &&
+             data.totalWorkerRewardsAllocatedTzs is int && data.totalWorkerRewardsAllocatedTzs >= 0 && data.totalWorkerRewardsAllocatedTzs <= 1000000000 &&
+             data.totalGrossVerifiedVolumeTzs is int && data.totalGrossVerifiedVolumeTzs >= 0 && data.totalGrossVerifiedVolumeTzs <= 1000000000 &&
+             (data.totalCommissionEarnedTzs + data.totalWorkerRewardsAllocatedTzs) == data.totalGrossVerifiedVolumeTzs &&
+             data.completedTransactionsCount is int && data.completedTransactionsCount >= 0 && data.completedTransactionsCount <= 10000000 &&
+             data.settlementProviderCode in ['UNCONFIGURED', 'SELCOM_BUSINESS_TZ', 'AZAMPAY_BUSINESS_TZ', 'CRDB_CORPORATE_TZ', 'NMB_BUSINESS_TZ'] &&
+             data.settlementMerchantRef is string && data.settlementMerchantRef.size() <= 80 &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidBusinessLedgerEntry(data) {
+      return isValidCommission(data) &&
+             data.verified == true &&
+             data.settlementChannel in ['ESCROW_VERIFIED_SPLIT'];
+    }
+
+    function isValidWithdrawal(data) {
+      return data.userId is string && data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.userName is string && data.userName.size() >= 1 && data.userName.size() <= 80 &&
+             data.amountTzs is int && data.amountTzs >= 1000 && data.amountTzs <= 1000000 &&
+             data.provider in ['MPESA_VODACOM', 'AIRTEL_MONEY', 'TIGOPESA_MIXX', 'HALOPESA'] &&
+             data.accountNumber is string && data.accountNumber.size() >= 10 && data.accountNumber.size() <= 20 &&
+             data.accountName is string && data.accountName.size() >= 2 && data.accountName.size() <= 80 &&
+             data.status in ['PENDING', 'APPROVED', 'REJECTED'] &&
+             (!('adminNote' in data) || (data.adminNote is string && data.adminNote.size() <= 300)) &&
+             data.requestedAt is timestamp && data.requestedAt <= request.time &&
+             (!('processedAt' in data) || (data.processedAt is timestamp && data.processedAt <= request.time));
+    }
+
+    // Admin registry (read-only for self check, managed via Firebase Console)
+    match /admins/{uid} {
+      allow get: if isSignedIn() && request.auth.uid == uid;
+      allow list, write: if false;
+    }
+
+    // 1. User Profiles & Wallet Balances
+    match /users/{userId} {
+      allow get: if isSignedIn() && isValidId(userId) && (request.auth.uid == userId || isAdmin());
+      allow list: if isSignedIn() && (request.auth.uid == userId || isBootstrappedAdmin());
+
+      allow create: if isSignedIn() &&
+                       isValidId(userId) &&
+                       request.auth.uid == userId &&
+                       incoming().keys().hasAll(['userId', 'fullName', 'username', 'email', 'phoneNumber', 'role', 'walletBalanceTzs', 'totalEarnedTzs', 'totalSpentTzs', 'tasksCompletedCount', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['userId', 'fullName', 'username', 'email', 'phoneNumber', 'preferredLanguage', 'role', 'walletBalanceTzs', 'totalEarnedTzs', 'totalSpentTzs', 'tasksCompletedCount', 'createdAt', 'updatedAt']) &&
+                       isValidUserProfile(incoming()) &&
+                       incoming().userId == request.auth.uid &&
+                       incoming().walletBalanceTzs >= 0 && incoming().walletBalanceTzs <= 2000 &&
+                       incoming().totalEarnedTzs == 0 &&
+                       incoming().totalSpentTzs == 0 &&
+                       incoming().tasksCompletedCount == 0 &&
+                       (incoming().role == 'USER' || (isBootstrappedAdmin() && incoming().role == 'ADMIN'));
+
+      allow update: if isSignedIn() &&
+                       isValidId(userId) &&
+                       isValidUserProfile(incoming()) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt && (
+                         // Tier 1: Admin updates (e.g., crediting task rewards, refunding declined withdrawals/campaigns)
+                         (isAdmin() &&
+                          incoming().diff(existing()).affectedKeys().hasOnly(['walletBalanceTzs', 'totalEarnedTzs', 'tasksCompletedCount', 'role', 'updatedAt'])) ||
+                         // Tier 2: Owner profile & language settings update
+                         (request.auth.uid == userId &&
+                          incoming().role == existing().role &&
+                          incoming().diff(existing()).affectedKeys().hasOnly(['fullName', 'username', 'phoneNumber', 'preferredLanguage', 'updatedAt'])) ||
+                         // Tier 3: Owner wallet top-up / campaign funding / withdrawal escrow hold
+                         (request.auth.uid == userId &&
+                          incoming().role == existing().role &&
+                          incoming().totalEarnedTzs == existing().totalEarnedTzs &&
+                          incoming().tasksCompletedCount == existing().tasksCompletedCount &&
+                          incoming().totalSpentTzs >= existing().totalSpentTzs &&
+                          incoming().diff(existing()).affectedKeys().hasOnly(['walletBalanceTzs', 'totalSpentTzs', 'updatedAt']))
+                       );
+
+      allow delete: if false;
+
+      // 2. User-scoped Immutable Wallet Transaction Records
+      match /transactions/{transactionId} {
+        allow get: if isSignedIn() && isValidId(transactionId) && (request.auth.uid == userId || isAdmin());
+        allow list: if isSignedIn() && (request.auth.uid == userId || isBootstrappedAdmin());
+
+        allow create: if isSignedIn() &&
+                         isValidId(transactionId) &&
+                         incoming().keys().hasAll(['userId', 'type', 'amountTzs', 'description', 'referenceCode', 'createdAt']) &&
+                         incoming().keys().hasOnly(['userId', 'type', 'amountTzs', 'description', 'referenceCode', 'createdAt']) &&
+                         isValidTransaction(incoming()) &&
+                         incoming().userId == userId && (
+                           (request.auth.uid == userId && incoming().type in ['DEPOSIT_TOPUP', 'CAMPAIGN_FUND', 'WITHDRAWAL']) ||
+                           isAdmin()
+                         );
+
+        allow update, delete: if false;
+      }
+    }
+
+    // 3. Social Promotion Tasks (Marketplace)
+    match /tasks/{taskId} {
+      allow get: if isSignedIn() && isValidId(taskId) &&
+                    (existing().status == 'ACTIVE' || existing().creatorUserId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() &&
+                     (resource.data.status == 'ACTIVE' || resource.data.creatorUserId == request.auth.uid || isBootstrappedAdmin());
+
+      allow create: if isSignedIn() &&
+                       isValidId(taskId) &&
+                       incoming().keys().hasAll(['creatorUserId', 'creatorName', 'title', 'description', 'platform', 'actionType', 'accountHandle', 'targetUrl', 'rewardTzs', 'totalSlots', 'completedSlots', 'status', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['creatorUserId', 'creatorName', 'title', 'description', 'platform', 'actionType', 'accountHandle', 'targetUrl', 'rewardTzs', 'grossPerSlotTzs', 'commissionPerSlotTzs', 'commissionEarnedTzs', 'totalSlots', 'completedSlots', 'status', 'createdAt', 'updatedAt']) &&
+                       isValidSocialTask(incoming()) &&
+                       incoming().creatorUserId == request.auth.uid &&
+                       incoming().completedSlots == 0 && (
+                         incoming().status == 'PENDING_REVIEW' ||
+                         (isAdmin() && incoming().status == 'ACTIVE')
+                       );
+
+      allow update: if isSignedIn() &&
+                       isValidId(taskId) &&
+                       isValidSocialTask(incoming()) &&
+                       incoming().creatorUserId == existing().creatorUserId &&
+                       incoming().createdAt == existing().createdAt && (
+                         (isAdmin() &&
+                          incoming().diff(existing()).affectedKeys().hasOnly(['status', 'completedSlots', 'commissionEarnedTzs', 'updatedAt'])) ||
+                         (existing().creatorUserId == request.auth.uid &&
+                          existing().status in ['ACTIVE', 'PAUSED'] &&
+                          incoming().status in ['ACTIVE', 'PAUSED'] &&
+                          incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt']))
+                       );
+
+      allow delete: if isAdmin();
+    }
+
+    // 4. Task Submissions & Verification Proofs
+    match /submissions/{submissionId} {
+      allow get: if isSignedIn() && isValidId(submissionId) &&
+                    (existing().workerUserId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() &&
+                     (resource.data.workerUserId == request.auth.uid || isBootstrappedAdmin());
+
+      allow create: if isSignedIn() &&
+                       isValidId(submissionId) &&
+                       incoming().keys().hasAll(['taskId', 'taskTitle', 'platform', 'actionType', 'rewardTzs', 'workerUserId', 'workerName', 'socialHandleUsed', 'proofNote', 'status', 'submittedAt']) &&
+                       incoming().keys().hasOnly(['taskId', 'taskTitle', 'platform', 'actionType', 'rewardTzs', 'workerUserId', 'workerName', 'socialHandleUsed', 'proofNote', 'proofImageUri', 'status', 'submittedAt']) &&
+                       isValidSubmission(incoming()) &&
+                       incoming().workerUserId == request.auth.uid &&
+                       incoming().status == 'PENDING' &&
+                       exists(/databases/$(database)/documents/tasks/$(incoming().taskId)) &&
+                       get(/databases/$(database)/documents/tasks/$(incoming().taskId)).data.status == 'ACTIVE' &&
+                       get(/databases/$(database)/documents/tasks/$(incoming().taskId)).data.creatorUserId != request.auth.uid &&
+                       incoming().rewardTzs == get(/databases/$(database)/documents/tasks/$(incoming().taskId)).data.rewardTzs;
+
+      allow update: if isSignedIn() &&
+                       isValidId(submissionId) &&
+                       isValidSubmission(incoming()) &&
+                       isAdmin() &&
+                       existing().status == 'PENDING' &&
+                       incoming().status in ['APPROVED', 'REJECTED'] &&
+                       incoming().workerUserId == existing().workerUserId &&
+                       incoming().taskId == existing().taskId &&
+                       incoming().rewardTzs == existing().rewardTzs &&
+                       incoming().submittedAt == existing().submittedAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['status', 'reviewerNote', 'reviewedAt']);
+
+      allow delete: if false;
+    }
+
+    // 5. Withdrawal Requests
+    match /withdrawals/{withdrawalId} {
+      allow get: if isSignedIn() && isValidId(withdrawalId) &&
+                    (existing().userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() &&
+                     (resource.data.userId == request.auth.uid || isBootstrappedAdmin());
+
+      allow create: if isSignedIn() &&
+                       isValidId(withdrawalId) &&
+                       incoming().keys().hasAll(['userId', 'userName', 'amountTzs', 'provider', 'accountNumber', 'accountName', 'status', 'requestedAt']) &&
+                       incoming().keys().hasOnly(['userId', 'userName', 'amountTzs', 'provider', 'accountNumber', 'accountName', 'status', 'requestedAt']) &&
+                       isValidWithdrawal(incoming()) &&
+                       incoming().userId == request.auth.uid &&
+                       incoming().status == 'PENDING';
+
+      allow update: if isSignedIn() &&
+                       isValidId(withdrawalId) &&
+                       isValidWithdrawal(incoming()) &&
+                       isAdmin() &&
+                       existing().status == 'PENDING' &&
+                       incoming().status in ['APPROVED', 'REJECTED'] &&
+                       incoming().userId == existing().userId &&
+                       incoming().amountTzs == existing().amountTzs &&
+                       incoming().requestedAt == existing().requestedAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['status', 'adminNote', 'processedAt']);
+
+      allow delete: if false;
+    }
+
+    // 6. Immutable 15% Platform Commission Ledger (keyed by submissionId to block duplicate payouts)
+    match /commissions/{commissionId} {
+      allow get: if isSignedIn() && isValidId(commissionId) &&
+                    (isAdmin() || existing().creatorUserId == request.auth.uid);
+      allow list: if isSignedIn() &&
+                     (isBootstrappedAdmin() || resource.data.creatorUserId == request.auth.uid);
+
+      allow create: if isSignedIn() &&
+                       isValidId(commissionId) &&
+                       isAdmin() &&
+                       incoming().keys().hasAll(['submissionId', 'taskId', 'taskTitle', 'creatorUserId', 'workerUserId', 'grossAmountTzs', 'commissionTzs', 'workerRewardTzs', 'referenceCode', 'createdAt']) &&
+                       incoming().keys().hasOnly(['submissionId', 'taskId', 'taskTitle', 'creatorUserId', 'workerUserId', 'grossAmountTzs', 'commissionTzs', 'workerRewardTzs', 'referenceCode', 'createdAt']) &&
+                       incoming().submissionId == commissionId &&
+                       isValidCommission(incoming()) &&
+                       !exists(/databases/$(database)/documents/commissions/$(commissionId));
+
+      allow update, delete: if false;
+    }
+
+    // 7. Segregated RAZAK TASK BUSINESS ACCOUNT (strictly separated from customer wallets, admin-only)
+    match /business_account/{accountId} {
+      allow get: if isAdmin() && accountId == 'razak_main';
+      allow list: if isBootstrappedAdmin();
+
+      allow create: if isSignedIn() &&
+                       accountId == 'razak_main' &&
+                       isAdmin() &&
+                       incoming().keys().hasAll(['accountId', 'accountName', 'totalCommissionEarnedTzs', 'totalWorkerRewardsAllocatedTzs', 'totalGrossVerifiedVolumeTzs', 'completedTransactionsCount', 'settlementProviderCode', 'settlementMerchantRef', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['accountId', 'accountName', 'totalCommissionEarnedTzs', 'totalWorkerRewardsAllocatedTzs', 'totalGrossVerifiedVolumeTzs', 'completedTransactionsCount', 'settlementProviderCode', 'settlementMerchantRef', 'updatedAt']) &&
+                       isValidBusinessAccount(incoming());
+
+      allow update: if isSignedIn() &&
+                       accountId == 'razak_main' &&
+                       isAdmin() &&
+                       isValidBusinessAccount(incoming()) &&
+                       incoming().accountId == existing().accountId &&
+                       incoming().totalCommissionEarnedTzs >= existing().totalCommissionEarnedTzs &&
+                       incoming().totalWorkerRewardsAllocatedTzs >= existing().totalWorkerRewardsAllocatedTzs &&
+                       incoming().totalGrossVerifiedVolumeTzs >= existing().totalGrossVerifiedVolumeTzs &&
+                       incoming().completedTransactionsCount >= existing().completedTransactionsCount;
+
+      allow delete: if false;
+
+      match /ledger/{entryId} {
+        allow get: if isAdmin() && accountId == 'razak_main' && isValidId(entryId);
+        allow list: if isBootstrappedAdmin() && accountId == 'razak_main';
+
+        allow create: if isSignedIn() &&
+                         accountId == 'razak_main' &&
+                         isValidId(entryId) &&
+                         isAdmin() &&
+                         incoming().keys().hasAll(['submissionId', 'taskId', 'taskTitle', 'creatorUserId', 'workerUserId', 'grossAmountTzs', 'commissionTzs', 'workerRewardTzs', 'referenceCode', 'verified', 'settlementChannel', 'createdAt']) &&
+                         incoming().keys().hasOnly(['submissionId', 'taskId', 'taskTitle', 'creatorUserId', 'workerUserId', 'grossAmountTzs', 'commissionTzs', 'workerRewardTzs', 'referenceCode', 'verified', 'settlementChannel', 'createdAt']) &&
+                         incoming().submissionId == entryId &&
+                         isValidBusinessLedgerEntry(incoming()) &&
+                         !exists(/databases/$(database)/documents/business_account/$(accountId)/ledger/$(entryId));
+
+        allow update, delete: if false;
+      }
+    }
+  }
+}

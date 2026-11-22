@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">RAZAQ TASK</string>
+    <string name="brand_title">RAZAQ TASK</string>
+    <string name="brand_tagline">Promote Socials. Earn TZS.</string>
+    <string name="currency_code">TZS</string>
+    <string name="nav_marketplace">Market</string>
+    <string name="nav_promote">Promote</string>
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_wallet">Wallet</string>
+    <string name="nav_admin">Admin</string>
+    <string name="action_sign_in">Sign In</string>
+    <string name="action_register">Create Account</string>
+    <string name="action_sign_out">Sign Out</string>
+    <string name="action_submit_proof">Submit Proof</string>
+    <string name="action_launch_campaign">Launch Campaign</string>
+    <string name="action_request_withdrawal">Request Withdrawal</string>
+    <string name="action_deposit_tzs">Top Up Wallet</string>
+</resources>

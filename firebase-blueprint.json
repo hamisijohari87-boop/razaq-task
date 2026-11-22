@@ -1,0 +1,193 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Authenticated Razak Task user profile and TZS wallet summary.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Firebase Auth UID of the user." },
+        "fullName": { "type": "string" },
+        "username": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "phoneNumber": { "type": "string" },
+        "preferredLanguage": { "type": "string", "enum": ["sw", "en", "fr", "ar", "es", "pt", "de", "zh", "hi", "tr"] },
+        "role": { "type": "string", "enum": ["USER", "ADMIN"] },
+        "walletBalanceTzs": { "type": "integer" },
+        "totalEarnedTzs": { "type": "integer" },
+        "totalSpentTzs": { "type": "integer" },
+        "tasksCompletedCount": { "type": "integer" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp (FieldValue.serverTimestamp())." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp (FieldValue.serverTimestamp())." }
+      },
+      "required": ["userId", "fullName", "username", "email", "phoneNumber", "role", "walletBalanceTzs", "totalEarnedTzs", "totalSpentTzs", "tasksCompletedCount", "createdAt", "updatedAt"]
+    },
+    "SocialTask": {
+      "title": "SocialTask",
+      "description": "Social media promotion campaign published on the Razak Task marketplace.",
+      "type": "object",
+      "properties": {
+        "creatorUserId": { "type": "string" },
+        "creatorName": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "platform": { "type": "string", "enum": ["INSTAGRAM", "TIKTOK", "YOUTUBE", "FACEBOOK", "X_TWITTER"] },
+        "actionType": { "type": "string", "enum": ["FOLLOW", "LIKE", "COMMENT", "SUBSCRIBE", "SHARE_REPOST"] },
+        "accountHandle": { "type": "string" },
+        "targetUrl": { "type": "string" },
+        "rewardTzs": { "type": "integer" },
+        "grossPerSlotTzs": { "type": "integer" },
+        "commissionPerSlotTzs": { "type": "integer" },
+        "commissionEarnedTzs": { "type": "integer" },
+        "totalSlots": { "type": "integer" },
+        "completedSlots": { "type": "integer" },
+        "status": { "type": "string", "enum": ["PENDING_REVIEW", "ACTIVE", "PAUSED", "COMPLETED", "REJECTED"] },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp (FieldValue.serverTimestamp())." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp (FieldValue.serverTimestamp())." }
+      },
+      "required": ["creatorUserId", "creatorName", "title", "description", "platform", "actionType", "accountHandle", "targetUrl", "rewardTzs", "totalSlots", "completedSlots", "status", "createdAt", "updatedAt"]
+    },
+    "TaskSubmission": {
+      "title": "TaskSubmission",
+      "description": "Worker verification proof submission for a social media task.",
+      "type": "object",
+      "properties": {
+        "taskId": { "type": "string" },
+        "taskTitle": { "type": "string" },
+        "platform": { "type": "string", "enum": ["INSTAGRAM", "TIKTOK", "YOUTUBE", "FACEBOOK", "X_TWITTER"] },
+        "actionType": { "type": "string", "enum": ["FOLLOW", "LIKE", "COMMENT", "SUBSCRIBE", "SHARE_REPOST"] },
+        "rewardTzs": { "type": "integer" },
+        "workerUserId": { "type": "string" },
+        "workerName": { "type": "string" },
+        "socialHandleUsed": { "type": "string" },
+        "proofNote": { "type": "string" },
+        "proofImageUri": { "type": "string" },
+        "status": { "type": "string", "enum": ["PENDING", "APPROVED", "REJECTED"] },
+        "reviewerNote": { "type": "string" },
+        "submittedAt": { "type": "string", "format": "date-time", "description": "Server timestamp (FieldValue.serverTimestamp())." },
+        "reviewedAt": { "type": "string", "format": "date-time", "description": "Server timestamp (FieldValue.serverTimestamp())." }
+      },
+      "required": ["taskId", "taskTitle", "platform", "actionType", "rewardTzs", "workerUserId", "workerName", "socialHandleUsed", "proofNote", "status", "submittedAt"]
+    },
+    "WalletTransaction": {
+      "title": "WalletTransaction",
+      "description": "Immutable TZS wallet ledger entry scoped to a user.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "type": { "type": "string", "enum": ["TASK_REWARD", "DEPOSIT_TOPUP", "CAMPAIGN_FUND", "PLATFORM_COMMISSION", "WITHDRAWAL", "WITHDRAWAL_REFUND"] },
+        "amountTzs": { "type": "integer" },
+        "description": { "type": "string" },
+        "referenceCode": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp (FieldValue.serverTimestamp())." }
+      },
+      "required": ["userId", "type", "amountTzs", "description", "referenceCode", "createdAt"]
+    },
+    "WithdrawalRequest": {
+      "title": "WithdrawalRequest",
+      "description": "TZS mobile money withdrawal payout request (M-Pesa, Airtel Money, Mixx by Yas, HaloPesa).",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "amountTzs": { "type": "integer" },
+        "provider": { "type": "string", "enum": ["MPESA_VODACOM", "AIRTEL_MONEY", "TIGOPESA_MIXX", "HALOPESA"] },
+        "accountNumber": { "type": "string" },
+        "accountName": { "type": "string" },
+        "status": { "type": "string", "enum": ["PENDING", "APPROVED", "REJECTED"] },
+        "adminNote": { "type": "string" },
+        "requestedAt": { "type": "string", "format": "date-time", "description": "Server timestamp (FieldValue.serverTimestamp())." },
+        "processedAt": { "type": "string", "format": "date-time", "description": "Server timestamp (FieldValue.serverTimestamp())." }
+      },
+      "required": ["userId", "userName", "amountTzs", "provider", "accountNumber", "accountName", "status", "requestedAt"]
+    },
+    "PlatformCommission": {
+      "title": "PlatformCommission",
+      "description": "Immutable 15% platform commission ledger record created atomically on approved completion.",
+      "type": "object",
+      "properties": {
+        "submissionId": { "type": "string" },
+        "taskId": { "type": "string" },
+        "taskTitle": { "type": "string" },
+        "creatorUserId": { "type": "string" },
+        "workerUserId": { "type": "string" },
+        "grossAmountTzs": { "type": "integer" },
+        "commissionTzs": { "type": "integer" },
+        "workerRewardTzs": { "type": "integer" },
+        "referenceCode": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp (FieldValue.serverTimestamp())." }
+      },
+      "required": ["submissionId", "taskId", "taskTitle", "creatorUserId", "workerUserId", "grossAmountTzs", "commissionTzs", "workerRewardTzs", "referenceCode", "createdAt"]
+    },
+    "BusinessAccount": {
+      "title": "BusinessAccount",
+      "description": "Segregated RAZAK TASK BUSINESS ACCOUNT tracking company 15% earnings separate from customer wallets.",
+      "type": "object",
+      "properties": {
+        "accountId": { "type": "string" },
+        "accountName": { "type": "string" },
+        "totalCommissionEarnedTzs": { "type": "integer" },
+        "totalWorkerRewardsAllocatedTzs": { "type": "integer" },
+        "totalGrossVerifiedVolumeTzs": { "type": "integer" },
+        "completedTransactionsCount": { "type": "integer" },
+        "settlementProviderCode": { "type": "string", "enum": ["UNCONFIGURED", "SELCOM_BUSINESS_TZ", "AZAMPAY_BUSINESS_TZ", "CRDB_CORPORATE_TZ", "NMB_BUSINESS_TZ"] },
+        "settlementMerchantRef": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["accountId", "accountName", "totalCommissionEarnedTzs", "totalWorkerRewardsAllocatedTzs", "totalGrossVerifiedVolumeTzs", "completedTransactionsCount", "settlementProviderCode", "settlementMerchantRef", "updatedAt"]
+    },
+    "BusinessLedgerEntry": {
+      "title": "BusinessLedgerEntry",
+      "description": "Immutable verified company ledger transaction recorded exclusively upon approved campaign task completion.",
+      "type": "object",
+      "properties": {
+        "submissionId": { "type": "string" },
+        "taskId": { "type": "string" },
+        "taskTitle": { "type": "string" },
+        "creatorUserId": { "type": "string" },
+        "workerUserId": { "type": "string" },
+        "grossAmountTzs": { "type": "integer" },
+        "commissionTzs": { "type": "integer" },
+        "workerRewardTzs": { "type": "integer" },
+        "referenceCode": { "type": "string" },
+        "verified": { "type": "boolean" },
+        "settlementChannel": { "type": "string", "enum": ["ESCROW_VERIFIED_SPLIT"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["submissionId", "taskId", "taskTitle", "creatorUserId", "workerUserId", "grossAmountTzs", "commissionTzs", "workerRewardTzs", "referenceCode", "verified", "settlementChannel", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Private user profile and customer TZS wallet balances (segregated from company earnings)."
+    },
+    "/users/{userId}/transactions/{transactionId}": {
+      "schema": { "$ref": "#/entities/WalletTransaction" },
+      "description": "User-scoped immutable TZS wallet transaction records."
+    },
+    "/tasks/{taskId}": {
+      "schema": { "$ref": "#/entities/SocialTask" },
+      "description": "Marketplace social promotion tasks."
+    },
+    "/submissions/{submissionId}": {
+      "schema": { "$ref": "#/entities/TaskSubmission" },
+      "description": "Task completion proof submissions."
+    },
+    "/withdrawals/{withdrawalId}": {
+      "schema": { "$ref": "#/entities/WithdrawalRequest" },
+      "description": "TZS withdrawal payout requests."
+    },
+    "/commissions/{commissionId}": {
+      "schema": { "$ref": "#/entities/PlatformCommission" },
+      "description": "Immutable 15% platform commission records keyed by submissionId."
+    },
+    "/business_account/{accountId}": {
+      "schema": { "$ref": "#/entities/BusinessAccount" },
+      "description": "Segregated RAZAK TASK BUSINESS ACCOUNT summary document (admin-only)."
+    },
+    "/business_account/{accountId}/ledger/{entryId}": {
+      "schema": { "$ref": "#/entities/BusinessLedgerEntry" },
+      "description": "Immutable verified company earnings ledger entries (admin-only, keyed by submissionId)."
+    }
+  }
+}

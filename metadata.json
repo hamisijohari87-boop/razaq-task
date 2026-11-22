@@ -1,0 +1,6 @@
+{
+  "name": "RAZAQ TASK",
+  "description": "RAZAQ TASK cross-platform social task marketplace connecting promoters and earners in Tanzanian Shillings (TZS).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

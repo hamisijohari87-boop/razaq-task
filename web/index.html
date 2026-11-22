@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="sw" dir="ltr" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RAZAQ TASK — Soko la Kazi &amp; Pochi ya TZS</title>
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <meta name="theme-color" content="#059669" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div id="toast-container" aria-live="polite"></div>
+
+  <!-- First-Time Language Onboarding View -->
+  <section id="onboarding-screen" class="auth-shell hidden">
+    <div class="onboarding-card card">
+      <div class="kv-row">
+        <span id="onb-badge" class="badge badge-green">CHAGUA LUGHA YAKO • LUGHA 10</span>
+        <span class="mono badge">RAZAQ TASK</span>
+      </div>
+      <div class="brand-row">
+        <div class="brand-badge">RQ</div>
+        <div>
+          <h1 id="onb-title" class="brand-title">Karibu RAZAQ TASK</h1>
+          <p id="onb-subtitle" class="brand-subtitle">Chagua lugha unayopendelea kutumia. Kiswahili kimewekwa kama lugha chaguo-msingi na unaweza kubadilisha wakati wowote kwenye Mipangilio &gt; Lugha.</p>
+        </div>
+      </div>
+
+      <div id="onboarding-lang-grid" class="onboarding-lang-grid"></div>
+
+      <button id="onboarding-continue-btn" class="btn btn-primary btn-lg full-width" type="button">
+        Endelea kwa Kiswahili
+      </button>
+    </div>
+  </section>
+
+  <!-- Auth View -->
+  <section id="auth-screen" class="auth-shell">
+    <div class="auth-card card">
+      <div class="kv-row">
+        <div class="brand-row">
+          <div class="brand-badge">RQ</div>
+          <div>
+            <h1 id="auth-brand-title" class="brand-title">RAZAQ TASK</h1>
+            <p id="auth-brand-subtitle" class="brand-subtitle">Soko la Kazi za Mitandao • TZS</p>
+          </div>
+        </div>
+        <button id="auth-lang-btn" class="btn btn-outline btn-sm" type="button">Kiswahili</button>
+      </div>
+
+      <p id="auth-lead" class="auth-lead">
+        Ingia mara moja na Google kusawazisha pochi yako ya TZS, kampeni halisi, mapato yako, na wasifu kati ya Android APK, Tableti, na Kompyuta za Windows.
+      </p>
+
+      <div class="feature-chips">
+        <span id="auth-chip-1" class="chip">Pata Pesa (Malipo 85%)</span>
+        <span id="auth-chip-2" class="chip">Kuza Akaunti za Kijamii</span>
+        <span id="auth-chip-3" class="chip">M-Pesa • Airtel • Mixx • HaloPesa</span>
+      </div>
+
+      <button id="google-signin-btn" class="btn btn-primary btn-lg full-width" type="button">
+        Endelea na Google
+      </button>
+
+      <p id="auth-error" class="error-banner hidden"></p>
+
+      <div class="auth-meta">
+        <span id="auth-meta-text">Usawazishaji wa Firebase Cloud • Akaunti Moja Simu &amp; Kompyuta</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Authenticated Cross-Platform App Shell -->
+  <div id="app-shell" class="app-shell hidden">
+    <aside class="sidebar" aria-label="Primary Navigation">
+      <div class="sidebar-top">
+        <div class="brand-row">
+          <div class="brand-badge">RQ</div>
+          <div>
+            <div id="sidebar-brand-title" class="brand-title">RAZAQ TASK</div>
+            <div id="sidebar-brand-subtitle" class="brand-subtitle">Usawazishaji wa Simu na Kompyuta</div>
+          </div>
+        </div>
+        <nav class="nav-list" id="desktop-nav"></nav>
+      </div>
+
+      <div class="sidebar-bottom">
+        <div class="wallet-pill-card" id="sidebar-wallet-card">
+          <div id="sidebar-bal-label" class="muted-label">Salio Linalopatikana</div>
+          <div class="mono balance-large" id="sidebar-balance">TZS 0</div>
+        </div>
+        <div class="sidebar-actions">
+          <button id="sidebar-profile-btn" class="btn btn-ghost btn-sm" type="button">Wasifu</button>
+          <button id="sidebar-lang-btn" class="btn btn-ghost btn-sm" type="button">Lugha</button>
+          <button id="theme-toggle-btn" class="btn btn-ghost btn-sm" type="button">Mandhari</button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar">
+        <div class="topbar-left">
+          <span class="mobile-brand">RAZAQ TASK</span>
+          <h2 id="topbar-title" class="topbar-title">Soko la Pata Pesa</h2>
+        </div>
+        <div class="topbar-right">
+          <button id="topbar-wallet-btn" class="wallet-chip mono" type="button">TZS 0</button>
+          <button id="topbar-lang-btn" class="btn btn-outline btn-sm" type="button">SW</button>
+          <button id="topbar-theme-btn" class="btn btn-outline btn-sm" type="button">Mandhari</button>
+          <button id="topbar-profile-btn" class="btn btn-outline btn-sm" type="button">Akaunti</button>
+        </div>
+      </header>
+
+      <main class="content-area" id="main-content"></main>
+    </div>
+
+    <nav class="bottom-nav" id="mobile-nav" aria-label="Mobile Navigation"></nav>
+  </div>
+
+  <!-- Modal Root -->
+  <div id="modal-backdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div id="modal-box" class="modal-box card"></div>
+  </div>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
